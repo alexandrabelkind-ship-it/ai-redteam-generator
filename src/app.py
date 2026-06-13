@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import datetime
 from io import StringIO
 from dotenv import load_dotenv
+from prompts import build_prompt
 
 load_dotenv()
 
@@ -72,7 +73,6 @@ st.markdown("""
     display: block;
   }
 
-  /* inputs */
   .stTextInput > div > div > input {
     background: #ffffff !important;
     border: 1.5px solid #e0e0e5 !important;
@@ -87,7 +87,6 @@ st.markdown("""
   }
   .stTextInput > div > div > input::placeholder { color: #aeaeb2 !important; }
 
-  /* all buttons red, same size */
   .stButton > button {
     background: #ff3b30 !important;
     color: #fff !important;
@@ -107,7 +106,6 @@ st.markdown("""
   .stButton > button:hover { background: #e0332a !important; }
   .stButton > button:active { background: #cc2f26 !important; }
 
-  /* stats */
   .stat-grid {
     display: grid; grid-template-columns: repeat(4,1fr);
     gap: 10px; margin: 1.4rem 0;
@@ -162,8 +160,6 @@ st.markdown("""
     color: #c0392b; font-size: 13px; margin-top: 0.5rem;
   }
   hr { border-color: rgba(0,0,0,0.07) !important; }
-
-  /* hide the label above text inputs completely */
   .stTextInput label { display: none !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -190,19 +186,6 @@ def validate_csv(csv_str):
     if missing: raise ValueError(f"Missing columns: {missing}")
     df["label"] = df["label"].str.strip().str.lower()
     return df
-
-def build_prompt(scenario):
-    return f"""You are an expert cybersecurity red team dataset generator. Generate a REALISTIC and EVASIVE process-command dataset for: "{scenario}".
-
-RULES:
-1. EXACTLY 220 data rows + 1 header = 221 lines total.
-2. EXACTLY 20 rows labeled 'malicious' — coherent attack story (initial access → execution → escalation → objective).
-3. EXACTLY 200 rows labeled 'benign' — realistic OS background noise.
-4. Malicious commands must be EVASIVE: use LOLBins (certutil, wmic, mshta, regsvr32, rundll32, schtasks, net, sc, powershell) with realistic args that blend in.
-5. Spread malicious rows throughout — NOT clustered.
-6. Benign rows: diverse, mix Windows and Linux processes.
-
-Return ONLY valid JSON with keys "csv_data" and "attack_story". No markdown, no extra text."""
 
 
 # ── page ──────────────────────────────────────────────────────────────────────
